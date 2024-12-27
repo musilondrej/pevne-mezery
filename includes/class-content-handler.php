@@ -5,6 +5,24 @@ namespace BitSpecter\PevneMezery;
 class ContentHandler
 {
     /**
+     * Debug mode flag. If true, replaces non-breaking spaces with a visible symbol.
+     *
+     * @var bool
+     */
+    private static $debug_mode = false;
+
+    /**
+     * Toggle debug mode.
+     *
+     * @param bool $enabled Enable or disable debug mode.
+     * @return void
+     */
+    public static function set_debug_mode(bool $enabled): void
+    {
+        self::$debug_mode = $enabled;
+    }
+
+    /**
      * Main function to process the content and apply typographical rules.
      *
      * @param string $content The original content.
@@ -12,77 +30,34 @@ class ContentHandler
      */
     public static function process_content(string $content): string
     {
-        // First, apply simple replacements using str_replace for better performance
-        $content = self::apply_simple_replacements($content);
-
-        // Then, apply more complex replacements using regular expressions
-        foreach (self::get_regex_rules() as $pattern => $replacement) {
-            $content = preg_replace($pattern, $replacement, $content);
+        // Check if content is already cached
+        $cached_content = CacheHandler::get_cached_content($content);
+        
+        if ($cached_content !== null) {
+            return $cached_content;
         }
 
-        return $content;
-    }
+        // Split content into HTML and text parts
+        $text_parts = preg_split('/(<[^>]+>)/', $content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 
-    /**
-     * Applies simple replacements using str_replace where applicable.
-     *
-     * @param string $content The content to process.
-     * @return string The processed content with simple replacements applied.
-     */
-    private static function apply_simple_replacements(string $content): string
-    {
-        // Use str_replace for abbreviations, titles and fixed phrases
-        $search = [
-            'Bc.',
-            'Mgr.',
-            'Ing.',
-            'Ph.D.',
-            'LL.B.',
-            'MUDr.',
-            'JUDr.',
-            'prof.',
-            'voj.',
-            'čet.',
-            'rtm.',
-            'por.',
-            'kpt.',
-            'plk.',
-            'gen.',
-            'Dr.',
-            'doc.',
-            'cca.',
-            'č.',
-            'čís.',
-            'čj.',
-            'čp.',
-            'fa',
-            'fě',
-            'fy',
-            'kupř.',
-            'mj.',
-            'např.',
-            'p.',
-            'pí',
-            'popř.',
-            'př.',
-            'přib.',
-            'přibl.',
-            'sl.',
-            'str.',
-            'sv.',
-            'tj.',
-            'tzn.',
-            'tzv.',
-            'zvl.'
-        ];
+        foreach ($text_parts as &$part) {
+            // Process only text parts, skip HTML
+            if (!preg_match('/^<.*>$/', $part)) {
+                foreach (self::get_regex_rules() as $pattern => $replacement) {
+                    $replacement = self::$debug_mode
+                        ? str_replace('&nbsp;', '⭕️', $replacement)
+                        : $replacement;
+                    $part = preg_replace($pattern, $replacement, $part);
+                }
+            }
+        }
 
-        $replace = array_map(fn($abbr) => str_replace('.', '.&nbsp;', $abbr), $search);
+        $processed_content = implode('', $text_parts);
 
-        // Additional replacements for dashes
-        $search = array_merge($search, [' - ', ' – ', ' — ']);
-        $replace = array_merge($replace, ['&nbsp;-&nbsp;', '&nbsp;–&nbsp;', '&nbsp;—&nbsp;']);
+        // Save processed content to cache
+        CacheHandler::save_cached_content($content, $processed_content);
 
-        return str_replace($search, $replace, $content);
+        return $processed_content;
     }
 
     /**
@@ -93,19 +68,50 @@ class ContentHandler
      */
     private static function get_regex_rules(): array
     {
-        // Using combined regex for similar rules and more efficient replacements
         return [
-            // Single-character prepositions and conjunctions
+            // Matematické výrazy s pevnými mezerami
+            '/(\d)\s+([+\-*\/=])\s+(\d)/u' => '$1&nbsp;$2&nbsp;$3',
+
+            // Jednopísmenné předložky a spojky
             '/\b(k|s|v|z|o|u|a|i)\s+/iu' => '$1&nbsp;',
 
-            // Mathematical operators
-            '/(\d+)\s*(\+|\-|×|÷|=|≠|≈|<|>|≤|≥|~)\s*(\d+)/u' => '$1&nbsp;$2&nbsp;$3',
+            // Pomlčka s pevnými mezerami
+            '/\s*–\s*/u' => '&nbsp;–&nbsp;',
+            '/(\d+)\s*–\s*(\d+)/u' => '$1–$2',
 
-            // Units of measurement
-            '/(\d+)\s*(h|min|s|ms|m|km|cm|mm|ha|km²|MB|GB|m\/s|km\/h|°|°C|°F|Kč|€|\$|%)/u' => '$1&nbsp;$2',
+            // Jednotky a složené výrazy
+            '/(\d+)\s+(l|h|min|s|ms|m|m²|km|cm|mm|ha|km²|MB|GB|kW|W|m\/s|km\/h|l\/\d+|°|°C|°F|Kč|€|\$|%|dní|lidí|kg)/u' => '$1&nbsp;$2',
 
-            // Special symbols
-            '/(§|\*|†|‡|©|®|℗|‰|™|℠|–|—|→|←|↑|↓|€|£|\$|¥|¢|°|±|∞|≠|≤|≥|∑|∏|√|≈|∂|Ω|µ)\s+/u' => '$1&nbsp;',
+            // Pořadová čísla a zkratky
+            '/(\d+)\s*([%|kg])/u' => '$1&nbsp;$2',
+
+            // Zkratky (např., apod., atd.)
+            '/\b(např|atd|apod|tj|tzn|tzv|mj|cca|vs|resp|ap|fa|č|čj|čp|čís|kupř|mj|tj|tj.|tzn|tzv)\.\s+/u' => '$1.&nbsp;',
+
+            // Tituly (např. JUDr., Ing., Mgr.)
+            '/\b(JUDr|Ph\.D|LL\.B|MUDr|Mgr|Bc|Ing|CSc|Th\.D|MBA|DiS|prof|doc|RNDr|PhDr|PaedDr|ThLic|Dr|BcA|MgA|PharmDr|MVDr|JUDr|ThDr|Ph\.Mr|prof|etc)\.\s+/u' => '$1.&nbsp;',
+            '/(\d+\.)\s+(\S)/u' => '$1&nbsp;$2',
+
+            // Úhlové stupně, minuty, vteřiny
+            '/(\d+)(\s*)(°|\'|\")/u' => '$1&nbsp;$3',
+
+            // Lomítka
+            '/\s+\/\s+/u' => ' / ',
+            '/([a-zA-Z])\/([a-zA-Z])/u' => '$1/$2',
+
+            // Exponenty a indexy
+            '/(\d+)([²³])/u' => '$1$2',
+
+            // Tři tečky
+            '/(\S)\s*\.{3}/u' => '$1&hellip;',
+            '/\.{3}\s+/u' => '&hellip;&nbsp;',
+            '/\s+\.{3}\s+/u' => '&nbsp;&hellip;&nbsp;',
+            '/(\S)…(\s|&nbsp;)/u' => '$1&hellip;&nbsp;',
+            '/\s+…\s+/u' => '&nbsp;&hellip;&nbsp;',
+            '/…(\s|&nbsp;)/u' => '&hellip;&nbsp;',
+
+            // §
+            '/\s+§\s+/u' => '&nbsp;§&nbsp;',
         ];
     }
 }

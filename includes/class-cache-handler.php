@@ -12,9 +12,9 @@ class CacheHandler
      * @param string $content The content to generate the cache key for.
      * @return string The unique cache key.
      */
-    private static function generate_cache_key(string $content): string
+    private static function generate_cache_key(string $content, string $context = 'default'): string
     {
-        return 'fs_fixed_spaces_' . md5($content);
+        return 'fs_fixed_spaces_' . $context . '_' . md5($content);
     }
 
     /**
@@ -69,8 +69,27 @@ class CacheHandler
     public static function invalidate_cache_on_post_save(int $post_id): void
     {
         $content = get_post_field('post_content', $post_id);
+
         if ($content) {
             self::delete_cached_content($content);
         }
+    }
+
+    /**
+     * Deletes all cache entries for a specific context.
+     *
+     * @param string $context The context to delete cache for.
+     * @return void
+     */
+    public static function delete_cache_by_context(string $context): void
+    {
+        global $wpdb;
+        $prefix = 'fs_fixed_spaces_' . $context;
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+                '_transient_' . $prefix . '%'
+            )
+        );
     }
 }
