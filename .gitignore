@@ -1,0 +1,21 @@
+# SVN files
+.svn/
+
+# WordPress specific
+*.log
+wp-config.php
+wp-content/uploads/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE specific
+.vscode/
+.idea/
+
+# Node modules (if any)
+node_modules/
+
+# Build artifacts
+*.zip
