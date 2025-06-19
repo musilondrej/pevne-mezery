@@ -20,5 +20,19 @@ node_modules/
 # Build artifacts
 *.zip
 
+# Composer
+vendor/
+composer.lock
+
+# Test artifacts
+/tmp/
+/temp/
+phpunit.xml.dist
+
+# Code coverage
+coverage/
+.coverage/
+clover.xml
+
 # Readme files
 readme.txt

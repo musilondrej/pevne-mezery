@@ -1,0 +1,30 @@
+parameters:
+    level: 5
+    paths:
+        - trunk/
+    excludePaths:
+        - trunk/languages/
+    ignoreErrors:
+        # WordPress functions are not available during static analysis
+        - '#Function wp_cache_flush not found#'
+        - '#Function get_transient not found#'
+        - '#Function set_transient not found#'
+        - '#Function delete_transient not found#'
+        - '#Function apply_filters not found#'
+        - '#Function add_filter not found#'
+        - '#Function load_plugin_textdomain not found#'
+        - '#Function plugin_dir_path not found#'
+        - '#Function plugin_basename not found#'
+        - '#Constant ABSPATH not found#'
+        - '#Constant HOUR_IN_SECONDS not found#'
+    
+    # WordPress specific configurations
+    bootstrapFiles:
+        - tests/phpstan-bootstrap.php
+    
+    # Check for missing typehints
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    
+    # Memory limit for large codebases
+    memoryLimitFile: .phpstan-memory-limit

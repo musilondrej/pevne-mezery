@@ -1,0 +1,61 @@
+# Development files
+/.git/
+/.github/
+/tests/
+/bin/
+/vendor/
+/node_modules/
+
+# Config files
+/.gitignore
+/.distignore
+/composer.json
+/composer.lock
+/package.json
+/package-lock.json
+/phpunit.xml
+/phpcs.xml
+/phpstan.neon
+/.phpcs.xml.dist
+
+# Documentation (keep README.md for GitHub)
+/DEVELOPER.md
+/EXAMPLES.md
+/CHANGELOG.md
+
+# IDE files
+/.vscode/
+/.idea/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+*.tmp
+/tmp/
+
+# Coverage reports
+/coverage/
+/tests/coverage-html/
+/tests/coverage.xml
+/tests/results.xml
+
+# Build artifacts
+/dist/
+/build/
+
+# WordPress.org assets (if any)
+/.wordpress-org/
+
+# SVN files (keep the structure but exclude .svn)
+/.svn/
+
+# Keep only essential files for distribution:
+# - trunk/ (main plugin files)
+# - tags/ (version tags)
+# - assets/ (plugin icons)
+# - README.md (GitHub readme)
+# - readme.txt (WordPress readme)

@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Pevné Mezery" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/squizlabs/PHP_CodeSniffer/master/phpcs.xsd">
+    <description>Coding standards for Pevné Mezery plugin</description>
+
+    <!-- Files to check -->
+    <file>trunk/</file>
+    <file>tests/</file>
+
+    <!-- Exclude patterns -->
+    <exclude-pattern>*/languages/*</exclude-pattern>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+
+    <!-- Include WordPress coding standards -->
+    <rule ref="WordPress">
+        <!-- Allow short array syntax -->
+        <exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
+        
+        <!-- Allow modern PHP syntax -->
+        <exclude name="PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations"/>
+        <exclude name="PHPCompatibility.FunctionDeclarations.NewParamTypeDeclarations"/>
+        
+        <!-- Exclude some overly strict rules -->
+        <exclude name="WordPress.Files.FileName"/>
+        <exclude name="WordPress.NamingConventions.ValidVariableName"/>
+        <exclude name="Squiz.Commenting.FileComment"/>
+        <exclude name="Squiz.Commenting.ClassComment"/>
+        <exclude name="Squiz.Commenting.FunctionComment"/>
+    </rule>
+
+    <!-- Include WordPress Extra rules -->
+    <rule ref="WordPress-Extra"/>
+
+    <!-- Include WordPress VIP rules (selective) -->
+    <rule ref="WordPress-VIP-Go">
+        <!-- Exclude rules that don't apply to plugins -->
+        <exclude name="WordPress.VIP.AdminBarRemoval"/>
+        <exclude name="WordPress.VIP.DirectDatabaseQuery"/>
+        <exclude name="WordPress.VIP.FileSystemWritesDisallow"/>
+        <exclude name="WordPress.VIP.PluginMenuSlug"/>
+        <exclude name="WordPress.VIP.PostsPerPage"/>
+        <exclude name="WordPress.VIP.RestrictedFunctions"/>
+        <exclude name="WordPress.VIP.RestrictedVariables"/>
+        <exclude name="WordPress.VIP.SessionFunctionsUsage"/>
+        <exclude name="WordPress.VIP.SessionVariableUsage"/>
+        <exclude name="WordPress.VIP.SlowDBQuery"/>
+        <exclude name="WordPress.VIP.SuperGlobalInputUsage"/>
+        <exclude name="WordPress.VIP.ValidatedSanitizedInput"/>
+        <exclude name="WordPress.VIP.WordPressVIPWhitelistedFunctions"/>
+    </rule>
+
+    <!-- Set minimum PHP version -->
+    <config name="minimum_supported_wp_version" value="5.0"/>
+    <config name="testVersion" value="8.0-"/>
+
+    <!-- Allow namespaces -->
+    <rule ref="PSR1.Classes.ClassDeclaration"/>
+    <rule ref="PSR2.Namespaces.NamespaceDeclaration"/>
+
+    <!-- Set text domain -->
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="pevne-mezery"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- Check for proper prefixing -->
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="MusilTech\PevneMezery"/>
+                <element value="pevne_mezery"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- Show progress -->
+    <arg value="p"/>
+    
+    <!-- Show sniff codes in all reports -->
+    <arg value="s"/>
+    
+    <!-- Use colors in output -->
+    <arg name="colors"/>
+    
+    <!-- Show results with extension -->
+    <arg name="extensions" value="php"/>
+</ruleset>

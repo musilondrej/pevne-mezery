@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+    bootstrap="tests/bootstrap.php"
+    colors="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    processIsolation="false"
+    stopOnFailure="false"
+    verbose="true"
+    testdox="true">
+    
+    <testsuites>
+        <testsuite name="Unit Tests">
+            <directory>tests/unit</directory>
+        </testsuite>
+        <testsuite name="Integration Tests">
+            <directory>tests/integration</directory>
+        </testsuite>
+    </testsuites>
+    
+    <coverage>
+        <include>
+            <directory suffix=".php">trunk/includes</directory>
+            <directory suffix=".php">trunk/integrations</directory>
+            <file>trunk/pevne-mezery.php</file>
+        </include>
+        <exclude>
+            <directory>tests</directory>
+            <directory>vendor</directory>
+        </exclude>
+        <report>
+            <html outputDirectory="tests/coverage-html"/>
+            <text outputFile="tests/coverage.txt"/>
+            <clover outputFile="tests/coverage.xml"/>
+        </report>
+    </coverage>
+    
+    <php>
+        <const name="WP_TESTS_PHPUNIT_POLYFILLS_PATH" value="vendor/yoast/phpunit-polyfills"/>
+    </php>
+    
+    <logging>
+        <junit outputFile="tests/results.xml"/>
+    </logging>
+</phpunit>

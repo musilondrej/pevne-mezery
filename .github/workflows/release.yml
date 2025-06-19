@@ -1,0 +1,94 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, mysql, mysqli, pdo_mysql, bcmath, soap, intl, gd, exif, iconv
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress
+
+    - name: Install WordPress test suite
+      run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 latest
+
+    - name: Run all tests
+      run: composer run test
+
+    - name: Run code quality checks
+      run: composer run quality
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+
+    - name: Install Composer dependencies (production)
+      run: composer install --prefer-dist --no-progress --no-dev --optimize-autoloader
+
+    - name: Create release package
+      run: |
+        mkdir -p dist
+        rsync -av --exclude-from='.distignore' . dist/pevne-mezery/
+        cd dist
+        zip -r pevne-mezery-${{ github.ref_name }}.zip pevne-mezery/
+
+    - name: Upload release artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: pevne-mezery-${{ github.ref_name }}
+        path: dist/pevne-mezery-${{ github.ref_name }}.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download release artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: pevne-mezery-${{ github.ref_name }}
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: pevne-mezery-${{ github.ref_name }}.zip
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

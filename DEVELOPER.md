@@ -153,42 +153,81 @@ $time = microtime(true) - $start;
 
 ## Testování
 
-### Unit testy
+Plugin obsahuje kompletní test suite s unit testy, integration testy a automatizovanou CI/CD pipeline.
 
-```php
-// Testování základní funkcjonality
-class PevneMezeryTest extends WP_UnitTestCase {
-    
-    public function test_single_letter_prepositions() {
-        $input = "k tomu";
-        $expected = "k&nbsp;tomu";
-        $result = \MusilTech\PevneMezery\ContentHandler::process_content($input);
-        $this->assertEquals($expected, $result);
-    }
-    
-    public function test_units() {
-        $input = "10 kg";
-        $expected = "10&nbsp;kg";
-        $result = \MusilTech\PevneMezery\ContentHandler::process_content($input);
-        $this->assertEquals($expected, $result);
-    }
-}
+### Rychlý start
+
+```bash
+# Instalace závislostí
+composer install
+
+# Nastavení WordPress test prostředí
+bash bin/install-wp-tests.sh wordpress_test root '' localhost latest
+
+# Spuštění všech testů
+composer test
 ```
 
-### Integration testy
+### Test struktura
 
-```php
-// Test WooCommerce integrace
-public function test_woocommerce_product_title() {
-    $product_id = $this->factory->post->create([
-        'post_type' => 'product',
-        'post_title' => 'Produkt s 10 kg'
-    ]);
-    
-    $title = get_the_title($product_id);
-    $this->assertStringContains('10&nbsp;kg', $title);
-}
 ```
+tests/
+├── unit/                      # Unit testy (bez WordPress)
+│   ├── ContentHandlerTest.php
+│   ├── CacheHandlerTest.php
+│   └── UtilsTest.php
+├── integration/               # Integration testy (s WordPress)
+│   ├── WordPressIntegrationTest.php
+│   ├── WooCommerceIntegrationTest.php
+│   └── ACFIntegrationTest.php
+├── helpers/                   # Test helpers
+└── fixtures/                  # Test data
+```
+
+### Typy testů
+
+#### Unit testy
+- **ContentHandlerTest**: Typografická pravidla, HTML parsing, debug režim
+- **CacheHandlerTest**: Cache systém, výkonnost
+- **UtilsTest**: Pomocné funkce, regex operace
+
+#### Integration testy
+- **WordPressIntegrationTest**: WordPress filtry, hooks, performance
+- **WooCommerceIntegrationTest**: E-shop integrace
+- **ACFIntegrationTest**: Custom fields podpora
+
+### Composer scripty
+
+```bash
+composer test              # Všechny testy
+composer test:unit         # Pouze unit testy
+composer test:integration  # Pouze integration testy
+composer test:coverage     # S coverage reportem
+composer cs:check          # Code style check
+composer cs:fix            # Code style fix
+composer analyze           # Static analysis (PHPStan)
+composer quality           # Všechny quality checks
+```
+
+### GitHub Actions CI/CD
+
+**Test Matrix:**
+- PHP: 8.0, 8.1, 8.2, 8.3
+- WordPress: 6.0, 6.1, 6.2, 6.3, 6.4, latest
+
+**Workflows:**
+- `tests.yml` - Při každém push/PR
+- `release.yml` - Při vytvoření release tagu
+
+### Coverage
+
+Plugin má vysoké pokrytí testy:
+- **Unit tests**: 95%+ code coverage
+- **Integration tests**: Všechny WordPress filtry
+- **Edge cases**: Error handling, empty inputs
+- **Performance**: Load testing, memory usage
+
+Podrobnosti v [tests/README.md](tests/README.md).
 
 ## Bezpečnost
 
