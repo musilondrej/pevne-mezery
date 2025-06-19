@@ -1,0 +1,14 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+	<title>Nový projekt</title>
+	<style>
+		.s0 { fill: #3e1624 } 
+		.s1 { fill: #f55f93 } 
+	</style>
+	<path id="Tvar 2" class="s0" d="m46.9 16.9h163.2c16.6 0 30 13.4 30 30v163.2c0 16.6-13.4 30-30 30h-163.2c-16.6 0-30-13.4-30-30v-163.2c0-16.6 13.4-30 30-30z"/>
+	<g id="Složka 1">
+		<path id="Tvar 1" class="s1" d="m79.4 103.6v50.4h-17.4v-50.4z"/>
+		<path id="Tvar 1 copy" class="s1" d="m79.4 103.6v50.4h-17.4v-50.4z"/>
+		<path id="Tvar 1 copy 3" class="s1" d="m195 103.6v50.4h-17.3v-50.4z"/>
+		<path id="Tvar 1 copy 2" class="s1" d="m195 154h-133v-17.3h133z"/>
+	</g>
+</svg>
