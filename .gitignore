@@ -19,3 +19,6 @@ node_modules/
 
 # Build artifacts
 *.zip
+
+# Readme files
+readme.txt
